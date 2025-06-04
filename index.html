@@ -2,6 +2,13 @@
 <html lang="en">
 
 <head>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "28dbd0afac7042278ffb07c41cc04f0e"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -88,6 +95,16 @@
   </main>
 
   <script>
+    class ZeroError extends Error {
+      constructor(message){
+        super(message);
+        this.name = "ZeroError";
+        this.datetime = new Date().toISOString();
+      }
+      toString(){
+        return `${this.name} at time ${this.datetime}: ${this.message}`;
+      }
+    }
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,13 +112,134 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+      try {
+        if( operator === '/' && secondNum === '0'){
+          throw new ZeroError();
+        }
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      }
+
+      catch(error) {
+        output.innerHTML = error.message;
+        console.error('Calcuating Error:', error);
+      }
+      finally{
+        console.log(`Calcuated: ${firstNum} ${operator} ${secondNum}`);
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+    const info = {
+      name: "Kyle Yay",
+      age: 34, 
+      address: {
+        street: "9876 Toms St",
+        city: "Marineford",
+        state: "OK"
+      },
+      hobbies: ["Manga", "Baseball", "Basketball"]
+    };
+
+    const users =[
+      {id: 9, name: "Red", role: "Leader"},
+      {id:8, name: "Hal", role: "member"},
+      {id:7, name: "Kirb", role: "member"},
+    ];
 
     // Start your code here
     // You may move this JS to another file if you wish
+    window.onerror = function(message, source, lineno, colno, error){
+      console.error('Gotcha! Global error caught:', {message, lineno, colno, error});
+      return true;
+    }
+    let count = 0; 
+    errorBtns.forEach((btn, index) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        try {
+          switch(index){ //console methods
+            case 0:
+              console.log("Console Log Demo");
+              console.log("Current values:", {
+                firstNum: document.querySelector('#first-num').value,
+                secondNum: document.querySelector('#second-num').value,
+                operator: document.querySelector('#operator').value,
+              });
+              break;
+            case 1: // console error
+              console.error("Console Error Demo");
+              break;
+
+            case 2: // console count
+              count++;
+              console.count("Count Demo");
+              break;
+            case 3:
+              console.warn("Console Warning Demo: WARNING");
+              break;
+            case 4: // assert
+              const numDemo = document.querySelector('#first-num').value
+              console.assert( numDemo > 10, "num not bigger than 10");
+              break;
+
+            case 5: // clear
+              console.clear();
+              console.log("Console Cleared");
+              break;
+
+            case 6: // console dir
+              console.dir(info);
+              break;
+
+            case 7: // dirxml
+              console.dirxml(document.querySelector('form'));
+              break;
+
+            case 8: // group start
+              console.group("User Info");
+              console.log("Name:", info.name);
+              console.log("Age:", info.age);
+              break;
+            case 9: // group end
+              console.groupEnd();
+              console.log("End of group");
+              break;
+            case 10: // console table
+              console.table(users);
+              break;
+
+            case 11: // start timer
+              console.time("Timing");
+              break;
+
+            case 12: // end timer
+              console.timeEnd("Timing");
+              break;
+
+            case 13: // trace
+              function outie() {
+                function innie(){
+                  console.trace("Trace demo");
+                }
+                innie();
+              }
+              outie();
+              break;
+
+            case 14: // global error
+              undefinedFunction();
+              break;
+          }
+        }
+        catch (error) {
+          console.error("button error :", error);
+          if(index === 14){
+            throw error;
+          }
+        }
+      });
+    });
   </script>
 </body>
 
